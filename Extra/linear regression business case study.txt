@@ -1,0 +1,268 @@
+Write points regarding below topics based on the give details
+1. Familiarize yourself with the business objectives, challenges, and KPIs. This will enable you to frame your findings in the context that resonates with business stakeholders.
+2. Review the coefficients from the logistic regression. Higher absolute values indicate greater importance. Consider the sign (+/-) to understand the direction of the relationship.
+3. Utilize well-labeled charts, plots, and graphs (like ROC AUC curve and Precision recall curve)to visualize and emphasize key insights
+4. Highlight the implications of false positives and false negatives. Discuss strategies to strike a balance, such as adjusting the classification threshold.
+5. Recommend strategies to improve loan approval processes, mitigate risks, or capitalize on opportunities. Support these recommendations with evidence from your analysis.
+6.Propose methods for continuously monitoring the model's performance over time and iterating based on new data or changing business needs
+
+Problem Statement
+Given a set of attributes for an individual, predict whether they qualify for a personal loan and recommend appropriate repayment terms based on their creditworthiness and risk profile. The goal is to assess borrower behavior, financial history, and risk factors to determine whether extending credit is viable, and if so, to propose optimal loan conditions such as repayment duration, interest rate, and loan amount. This decision-making process aims to balance the financial needs of the borrower with the lender's risk management strategy, enhancing both customer satisfaction and business profitability.
+
+Statistical Summary (Numerical Columns):
+Loan Amount (loan_amnt): The average loan amount is approximately 14,114, with a range between 500 and 40,000. This suggests that most loans are relatively smaller (around 8,000 - 12,000), with a few large loans driving the upper bound.
+Interest Rate (int_rate): The mean interest rate is 13.64%, with a standard deviation of 4.47%. This implies a somewhat uniform interest rate distribution with some outliers.
+Installment (installment): The average installment is 431.85, with a high standard deviation (250.73). This suggests that installment amounts can vary significantly depending on the loan amount.
+Annual Income (annual_inc): The average annual income is about 74,203, with a high standard deviation (61,637), indicating a large income disparity in the dataset.
+Debt-to-Income Ratio (dti): The average dti is 17.38, indicating a moderate level of debt compared to income on average.
+open_acc (Open Accounts): Average number of open accounts: 11.31. Range: 0 to 90. The majority have between 8 (25th percentile) and 14 (75th percentile) open accounts.
+pub_rec (Public Records): Average number of public records: 0.18. Range: 0 to 86. Most borrowers have 0 public records.
+Revolving Balance (revol_bal): The mean revolving balance is around 15,844, which seems reasonable given the range of credit balances.
+Revolving Utilization (revol_util): The mean is 53.79, showing that on average, individuals are using more than half of their available credit, with a std deviation of 24.45 suggesting high variation.
+total_acc (Total Accounts): Average total accounts: 25.41. Range: 2 to 151. Typically, borrowers have between 17 (25th percentile) and 32 (75th percentile) total accounts.
+Mortgage Accounts (mort_acc): The mort_acc column has a mean of 1.81 but also significant missing data (9.54%). It might be worth investigating how it impacts the dataset and whether imputation or dropping is better.
+pub_rec_bankruptcies: Average bankruptcies: 0.12. Range: 0 to 8. Most borrowers have 0 bankruptcies.
+earliest_cr_line_month: Average month: June (6.76). Range: January (1) to December (12).
+earliest_cr_line_year: Average year: 1997.86. Range: 1944 to 2013. The 25th percentile year is 1994, and the 75th percentile is 2003.
+
+Analysis and Insights (Categorical Columns)
+Term:
+The majority of loans have a term of 36 months (about 76%) compared to 60 months (around 24%).
+Insight: Most borrowers prefer shorter-term loans, possibly due to quicker repayment cycles. This could indicate a more financially stable borrower group.
+Grade:
+The most common grades are B (29%) and C (27%), followed by A (16%) and D (16%).
+Insight: The grade distribution shows that the loans are largely concentrated in the middle-range credit grades. This suggests that most borrowers are not in the highest or lowest risk categories.
+Sub-Grade:
+The sub-grades B3, B4, and C1 are the most frequent, with B3 being the highest.
+Insight: Sub-grades are more granular, and this distribution shows a heavy skew toward B and C grades. Loans for these sub-grades likely represent moderate-risk borrowers.
+Employment Title:
+There is a wide range of unique job titles (173,105 in total), with "Teacher", "Manager", "Registered Nurse", and "Supervisor" being the most frequent.
+Insight: The variety in employment titles suggests a diverse borrower base. Certain job titles, like "Teacher" and "Manager", could represent stable income sources, which may correlate with loan repayment ability.
+Employment Length:
+The majority of borrowers have 10+ years of employment (about 31%), followed by 2 years (9%), and < 1 year (8%).
+Insight: Most borrowers have a relatively long and stable employment history, which is a positive indicator of financial stability and the ability to repay loans.
+Home Ownership:
+The majority of borrowers have a mortgage (50%), followed by renters (40%), and a smaller percentage of owners (9%).
+Insight: A large number of borrowers have mortgages, which might suggest that many of them have some level of financial stability but are also leveraging credit for additional financial needs.
+Verification Status:
+The majority of borrowers are "Verified" (35%), followed by "Source Verified" (33%) and "Not Verified" (32%).
+Insight: A large proportion of borrowers have verified income or other details, suggesting that the dataset may represent a relatively trustworthy sample of applicants.
+Issue Date:
+The issue dates are spread across multiple years, with Oct 2014 being the most common issue month (approximately 3.75% of the data).
+Insight: The dataset covers a broad range of loan periods, which could provide valuable insights into trends over time, such as changes in loan types, amounts, and interest rates.
+Loan Status:
+Most loans have been "Fully Paid" (80%), while a smaller percentage are "Charged Off" (20%).
+Insight: The high percentage of fully paid loans suggests that the dataset could primarily consist of borrowers who successfully repaid their loans, which could positively skew risk assessments.
+Purpose:
+The majority of loans are taken for debt consolidation (59%), followed by credit card refinancing (21%).
+Insight: Debt consolidation is a major reason for taking out loans, indicating that many borrowers may be trying to simplify their finances by consolidating multiple debts into one.
+Title:
+Titles like "Debt Consolidation" and "Credit Card Refinancing" are the most common, reflecting the purposes of the loans.
+Insight: The similarity in loan titles and purposes (such as debt consolidation) further confirms the idea that borrowers are using these loans to manage or restructure their debts.
+Initial List Status:
+The majority of loans were listed as "f" (fully funded), followed by "w" (waiting for funding).
+Insight: The preponderance of fully funded loans (80%) indicates that most loans in the dataset were successfully issued.
+Application Type:
+Most applicants applied as "INDIVIDUAL" (99%), with a very small percentage applying as "JOINT" or "DIRECT_PAY".
+Insight: The high percentage of individual applicants may indicate that personal loans are more common than joint loans in this dataset.
+City:
+The city column has 67,513 unique values, with DPO (14,289), APO (14,060), and FPO (14,035) dominating, indicating a high number of military or government addresses. The distribution is skewed, with most cities appearing only once or a few times.
+State:
+The state column has 54 unique values, with AP (14,308), AE (14,157), and AA (13,919) being the most frequent, indicating a significant number of military or diplomatic addresses. The distribution shows other states appearing in smaller, relatively even proportions.
+
+Analysis and Insights (Numerical Columns)
+Loan Amount (loan_amnt)
+Skewness: The data is positively skewed, meaning most loan amounts are towards the lower range (closer to the minimum).
+Top Values: Loan amounts around 10,000 to 20,000 are the most common.
+Outliers: A few loan amounts (like 36,525, 39,475) appear only once, indicating these are rare or erroneous entries.
+Z-Scores: Most values fall within typical ranges, with some significant deviations indicating potential outliers.
+Interest Rate (int_rate)
+Skewness: Slight positive skew, meaning there are more loans with lower interest rates.
+Top Values: The most frequent interest rates are in the 10-16% range.
+Outliers: A few unique high interest rates (such as 24.40%) indicate possible data anomalies.
+Z-Scores: Most values are within a reasonable range, though a few exhibit large negative or positive deviations.
+Installment Amount (installment)
+Skewness: Positive skew, meaning most installment values are lower.
+Top Values: Common installment amounts range from 300 to 600.
+Outliers: A few very high installment amounts (e.g., 1146.14) that may be errors or represent high-loan amounts with high-interest rates.
+Z-Scores: Some values (e.g., 1.98) indicate extreme deviations that may require further investigation.
+Annual Income (annual_inc)
+Skewness: Extremely high skewness, with most borrowers earning below average but some extreme high-income values.
+Top Values: Common annual incomes are around 50,000 to 80,000.
+Outliers: Many extreme high-income values (e.g., 745,000) are likely outliers or errors in data entry.
+Z-Scores: Large variation, with significant deviations indicating possible data errors or outliers.
+Debt-to-Income Ratio (dti)
+Skewness: Extremely high skewness, with most values clustered at the lower end (around 0-20%).
+Top Values: Most common values are multiples of 1.2, such as 14.4, 16.8, etc.
+Outliers: High DTI ratios (e.g., 45.15) indicate potential outliers.
+Z-Scores: Indicates a few unusual values, suggesting potential data issues or outliers that require correction.
+Number of Open Accounts (open_acc)
+Skewness: Slightly positive skew, indicating most individuals have around 9 to 14 open accounts.
+Top Values: Common account numbers are between 5 and 14.
+Outliers: Very few people have an unusually high number of open accounts (e.g., 90).
+Z-Scores: Most values are within a reasonable range, with only a few extremes.
+Public Records (pub_rec)
+Skewness: Highly skewed, as most individuals have no public records.
+Top Values: 0 (no public records) is the most frequent value, with 1 and 2 being common as well.
+Outliers: Some individuals have multiple public records, though these are rare.
+Z-Scores: Most values are clustered around zero, but the distribution suggests many zeros and some rare high counts.
+Revolving Balance (revol_bal)
+Skewness: Extremely positive skew, meaning most individuals have a small revolving balance.
+Top Values: Many entries have a balance of 0, with others ranging from 5,000 to 10,000.
+Outliers: Some high revolving balances (e.g., 568,659) are rare and likely indicate data errors or rare extreme cases.
+Z-Scores: There are a few extreme outliers, suggesting potential errors or misreported data.
+Revolving Utilization (revol_util)
+Skewness: Slight negative skew, with most revolving utilization ratios around 50%.
+Top Values: Most common values are 53, 60, 61%, with some slightly deviating percentages (e.g., 37.63).
+Outliers: A few extreme values (e.g., 146.1%) are likely errors or unusual cases.
+Z-Scores: Indicates that most values fall within normal ranges, with a few extreme deviations.
+Total Accounts (total_acc)
+Skewness: Slightly positive skew, with most individuals having between 17 and 26 total accounts.
+Top Values: Most common account numbers are around 20 to 26.
+Outliers: A few outliers with very high numbers of total accounts (e.g., 118, 151).
+Z-Scores: There are some significant deviations from the mean, suggesting a few individuals have exceptionally high or low account counts.
+Mortgage Accounts (mort_acc)
+Skewness: Positive skew, with most individuals having no mortgage accounts.
+Top Values: Most frequent counts are 0, 1, and 2 mortgage accounts.
+Outliers: Few individuals have more than 10 mortgage accounts, which might be rare or indicate special cases.
+Z-Scores: Generally clustered around zero, with a few outliers indicating unusual mortgage patterns.
+Public Record Bankruptcies (pub_rec_bankruptcies)
+Skewness: Highly skewed, with most individuals having no bankruptcies.
+Top Values: Most common is 0 (no bankruptcies), followed by 1 bankruptcy.
+Outliers: Few individuals have more than 1 bankruptcy, suggesting rare extreme cases.
+Z-Scores: Most values are clustered near zero, indicating that most borrowers have no bankruptcies, with a few exceptions.
+earliest_cr_line_month:
+Skewness: -0.1285 (Slightly left-skewed distribution, indicating the values are relatively balanced but slightly weighted towards earlier months.)
+Kurtosis: -1.2020 (Platykurtic distribution, meaning the data is flatter and has lighter tails than a normal distribution.)
+Top 10 Frequent Months: The most common months are October (38,291), September (37,673), and August (37,349). These months suggest seasonal trends in the earliest credit line dates, possibly due to financial cycles or borrower behaviors.
+Bottom 10 Frequent Months: February (29,043) and April (29,231) are the least frequent months, indicating fewer credit lines originated during these periods.
+Z-Scores: The first 10 z-scores indicate some variation around the mean, with values like 1.5266 showing above-average occurrences and -1.6757 showing below-average occurrences, highlighting moderate dispersion.
+earliest_cr_line_year:
+Skewness: -1.0736 (The distribution is moderately left-skewed, meaning there are more recent years with earlier credit lines compared to older years.)
+Kurtosis: 1.7421 (Leptokurtic distribution, indicating a higher peak and heavier tails than a normal distribution, suggesting a concentration of data around a central point with outliers at both ends.)
+Top 10 Frequent Years: The most common years for earliest credit lines are from 2000 to 2003, with 2000 (29,366) and 2001 (29,083) being the most frequent. This suggests a concentration of credit lines issued around the early 2000s, possibly due to a financial boom or lending pattern during that period.
+Bottom 10 Frequent Years: The least frequent years are from the 1950s, with 1958 (12), 1955 (9), and others having very few occurrences. This likely indicates a very small number of older credit lines from individuals whose financial activity was reported long after the initial credit establishment.
+Z-Scores: The first 10 z-scores show moderate variations around the mean, with values like 1.2700 indicating years with higher occurrences and -1.0916 showing below-average frequencies for specific years. These variations suggest that while most data is concentrated in more recent years, some older years have relatively few data points.
+
+Analysis and Insights of 'loan_term' and rest of the categorial column
+loan term:
+Loans with a 60-month term have a significantly higher default rate (31.9%) compared to 36-month term loans (15.8%).
+36-month term loans have a higher likelihood of being fully paid (84.2%) compared to 60-month term loans (68.1%).
+There are significantly more 36-month term loans (301,965) than 60-month term loans (94,025).
+grade:
+Grade A loans have a 93.7% chance of being fully paid, while Grade G loans have only a 52.2% chance of being fully paid. This pattern suggests a clear correlation between lower grades and higher risk of default.
+Grades B and C have the highest volume of loans, making them popular choices but with a moderate risk of default. Grade G has the lowest volume, likely due to the high risk associated with these loans.
+High-grade loans (A and B) are safer investments and have a higher likelihood of being fully repaid. Lower-grade loans (E, F, and G) should be approached with caution, potentially requiring higher interest rates or stricter borrower evaluations to mitigate risk.
+sub_grade:
+As the sub-grade decreases (from A1 to G5), the default rate (charged off rate) increases. For example, A1 has a 2.87% default rate, while G5 has a default rate of 50.3%. This suggests that loans with lower sub-grades are significantly riskier.
+Higher sub-grades (A1, A2, A3) have a high percentage of fully paid loans, with A1 having about 97.13% of loans fully paid. Lower sub-grades (F and G) show a decline in fully paid rates, with G5 having only 50.3% of loans fully paid.
+Higher sub-grades (A1, A2, B1, B2, etc.) account for a larger portion of loans and have lower risk. Lower sub-grades (E, F, G) have fewer loans, and the default rates are much higher, indicating these loans are considered high-risk.
+emp_length:
+The default rate (Charged Off Rate) is higher for shorter employment lengths. For example, individuals with less than 1 year of employment have a 19.93% charged off rate, while those with 10+ years of employment have a 18.42% charged off rate. This suggests that shorter employment periods are slightly riskier in terms of loan defaults compared to longer employment histories.
+Longer employment (such as 10+ years) correlates with higher fully paid rates. For example, individuals with 10+ years of employment have an 81.58% fully paid rate, while those with less than 1 year of employment have 80.07%. This indicates that individuals with longer tenure in their jobs are slightly more likely to fully repay their loans.
+While there is a slightly higher default rate for individuals with shorter employment lengths, the difference is not substantial. The fully paid rate remains relatively high across all employment categories, suggesting that employment length is a moderate factor in predicting loan repayment.
+Lenders may want to consider employment history as part of the loan approval process, but other factors like income stability, credit score, and debt-to-income ratio may be more predictive of loan default.
+Applicants with < 1 year of employment or 1 year of employment may be considered riskier, though not drastically so. Lenders may want to tailor lending rates or use other measures (e.g., higher interest rates, stricter terms) when dealing with such individuals.
+home_ownership:
+The default rate (Charged Off Rate) is highest for individuals with RENT and NONE home ownership status: RENT: 22.65% and NONE: 22.58%. This indicates that individuals who rent or have no home ownership are slightly more likely to default on their loans.
+The fully paid rate (Fully Paid Rate) is highest for individuals with a home ownership status of ANY, which has a 100% fully paid rate. However, this category contains very few loans (only 3 loans in total). MORTGAGE holders have the second-highest fully paid rate at 83.04%, followed by OTHER at 85.71%. This suggests that homeowners, particularly those with mortgages, tend to repay their loans more reliably compared to renters or individuals with no home ownership.
+The ANY category has a 0% charged-off rate, but this category is very small (only 3 loans). MORTGAGE holders have a relatively low charged-off rate of 16.96%, which is significantly lower than those with RENT or NONE statuses.
+A significant proportion of loans are issued to individuals who either rent (159,790 loans) or have a mortgage (198,348 loans). However, individuals with RENT or NONE statuses tend to default more frequently, suggesting that home ownership (especially mortgage holders) may be a predictor of lower risk.
+Renters and individuals with no home ownership are riskier applicants compared to homeowners (especially those with mortgages). Lenders might consider adjusting loan terms or applying stricter eligibility criteria for renters and individuals without home ownership to mitigate risk.
+verification_status:
+The default rate (Charged Off Rate) is highest for individuals with Verified and Source Verified status: Verified: 22.32% and Source Verified: 21.46%. This indicates that applicants with verification statuses of "Verified" and "Source Verified" have a higher likelihood of defaulting on their loans compared to those who are Not Verified.
+The fully paid rate (Fully Paid Rate) is highest for individuals with Not Verified status at 85.34%, followed by Source Verified at 78.54% and Verified at 77.68%. Interestingly, individuals who are Not Verified actually have the highest rate of fully paid loans, suggesting that while verification status is important, other factors might be at play in determining loan repayment behavior.
+A large number of loans are issued to individuals who are either Not Verified (125,082 loans) or Verified (139,563 loans). However, despite a larger number of loans in these categories, the default rates are higher for verified individuals. Not Verified applicants, despite having fewer loans overall, have a higher percentage of loans fully paid off, indicating that loan verification might not always correlate with better repayment performance.
+Applicants who are Source Verified or Verified appear to have higher chances of default. Lenders might need to assess these applications more carefully and consider other factors, such as credit history or income, as these individuals are more likely to default compared to those who are Not Verified.
+The Not Verified group has the highest percentage of loans that are fully paid. While the exact reasons behind this trend are unclear, it might suggest that other characteristics (e.g., income level, credit score) of Not Verified individuals are stronger predictors of loan repayment than the verification status itself.
+purpose:
+The small business purpose has the highest default rate at 29.43%, indicating that individuals seeking loans for small businesses have a significantly higher likelihood of defaulting. Renewable energy loans also have a high default rate at 23.41%, which may suggest that loans for energy projects or green initiatives are riskier.
+Loans for weddings have the lowest default rate at 12.09%, followed by car loans at 13.47%, which indicates that these types of loans are more likely to be paid off in full.
+Loans for weddings and cars have the highest fully paid rates at 86.53% and 87.91%, respectively. On the other hand, small business loans have the lowest fully paid rate at 70.57%, which is consistent with the high default rate for this category.
+Debt consolidation loans have a high number of fully paid loans (79.26%) and a significant number of charged off loans. This indicates that while debt consolidation may help borrowers manage their debts, it does not necessarily guarantee repayment. Credit card loans also have a relatively high fully paid rate (83.09%) but a noticeable proportion of defaults (16.91%), suggesting credit card-related loans carry moderate risk.
+initial_list_status:
+The charged off rate for w (20.06%) is slightly higher than that for f (19.33%), indicating that loans under the w status are marginally more likely to default.
+The fully paid rate for f (80.67%) is slightly higher than that for w (79.94%), indicating that loans listed with f status have a slightly better repayment record.
+There are more loans in the f status than in the w status. Specifically, the total number of loans with f status is 238,066, while loans with w status are 157,964. This suggests that f status loans are more common than w status loans, yet both types have relatively similar repayment behavior.
+application_type:
+The charged off rate is highest for DIRECT_PAY loans (35.7%), followed by INDIVIDUAL loans (19.6%), and the lowest for JOINT loans (12.7%). This indicates that loans where the application type is DIRECT_PAY have a significantly higher default rate compared to INDIVIDUAL and JOINT loans.
+The fully paid rate is highest for JOINT loans (87.4%), followed by INDIVIDUAL loans (80.2%), and the lowest for DIRECT_PAY loans (64.3%). This suggests that JOINT loans tend to have better repayment outcomes compared to other types of loans.
+The majority of the loans are of INDIVIDUAL type, with a total of 395,319 loans, accounting for a significant portion of the dataset. JOINT loans are relatively rare, with only 425 loans, while DIRECT_PAY loans are also quite low in number (286).
+state:
+The Charged Off Rate is consistent across most states, hovering around 19.5% to 19.8%, with only slight variations. Some states like AK and TX have a slightly higher charged-off rate, but overall, this trend seems uniform across the dataset.
+The Fully Paid Rate is consistently high across all states, generally around 80%. This indicates that most loans, irrespective of the state, are repaid on time, with only a small portion being charged off.
+States like AA and AE have higher loan volumes, suggesting a greater presence of loans from these regions in the dataset. Smaller states, like AK, still show a reasonable number of loans but represent a smaller proportion of the total dataset.
+
+Analysis and Insights of 'loan_term_num' and rest of the numerical columns
+High Positive Correlations
+loan_amnt and installment (95.39%): Loan amount and installment are strongly correlated, as the installment amount directly depends on the loan amount and interest rate.
+loan_amnt and annual_inc (33.69%): Borrowers with higher annual incomes tend to take larger loan amounts.
+total_acc and open_acc (68.07%): The total number of accounts and open accounts are closely related, as open accounts contribute to the total account count.
+pub_rec and pub_rec_bankruptcies (69.94%): Public records and bankruptcies are highly correlated, which makes sense as bankruptcies are part of public records.
+mort_acc and total_acc (38.11%): Borrowers with higher total accounts often have more mortgage accounts, reflecting greater financial activity.
+Moderate Positive Correlations
+int_rate and revol_util (29.37%): Borrowers with higher revolving credit utilization may face higher interest rates, possibly due to increased credit risk.
+revol_bal and annual_inc (29.98%): Higher annual incomes are moderately correlated with higher revolving balances, possibly indicating higher credit usage.
+issue_year and loan_amnt (11.51%): Recent loan issues tend to have higher amounts, potentially reflecting inflation or changes in lending practices.
+High Negative Correlations
+earliest_cr_line_year and total_acc (-27.81%): Borrowers with older credit lines tend to have fewer total accounts, likely reflecting a more conservative credit approach.
+loan_status_num and int_rate (-24.78%): A negative correlation suggests that higher interest rates are associated with poorer loan outcomes (loan_status_num may represent default likelihood).
+earliest_cr_line_year and mort_acc (-29.13%): Borrowers with older credit lines tend to have fewer mortgage accounts, possibly due to earlier financial habits or different financial goals.
+Weak or Insignificant Correlations
+Variables like issue_month and loan_amnt, dti, or open_acc show correlations close to 0, indicating no meaningful relationship.
+earliest_cr_line_month has consistently low correlations with most variables, suggesting it has little predictive power in this context.
+Key Insights
+Loan Performance Indicators: High interest rates and high int_rate correlate negatively with loan_status_num, suggesting they might be risk factors for defaults.
+Credit Utilization: Higher revol_util (credit utilization) correlates positively with int_rate, potentially signaling risk assessment by lenders.
+Financial Activity: Strong positive correlations among total_acc, open_acc, and mort_acc reflect that borrowers with more financial accounts are likely to have diverse credit profiles.
+Temporal Trends: Negative correlation between earliest_cr_line_year and loan_amnt suggests that newer borrowers tend to take higher loan amounts.
+Public Records: Strong correlation between pub_rec and pub_rec_bankruptcies underscores the importance of public records in credit analysis.
+
+Key Insights from model Coeeficients:
+Significant Positive Coefficients:
+emp_title (12.52): This feature has the highest positive coefficient, meaning that higher values of emp_title strongly increase the likelihood of the positive class (e.g., loan approval or a similar outcome in the model). It suggests that the title of employment plays a crucial role in predicting the target.
+city (9.10): The city feature also has a large positive coefficient, indicating that the location of the applicant significantly influences the outcome. This suggests that certain cities may be associated with higher probabilities of success in the target variable (e.g., loan approval or application acceptance).
+title (6.37): The title feature (which could refer to the type of loan or its designation) is positively correlated with the outcome. This reinforces the idea that specific loan types or titles are more likely to result in a positive outcome.
+Significant Negative Coefficients:
+int_rate (-2.06): A higher interest rate decreases the likelihood of a positive outcome (e.g., loan approval or acceptance). This is expected, as higher rates are typically associated with riskier loans or less favorable conditions.
+dti (-1.90): The Debt-to-Income ratio (dti) also has a negative coefficient, meaning that higher debt-to-income ratios reduce the likelihood of the positive class. This is logical, as individuals with higher DTI ratios are seen as riskier candidates for approval.
+purpose (-1.42): The purpose of the loan (e.g., debt consolidation, home improvement, etc.) negatively affects the outcome, suggesting that certain loan purposes are less likely to lead to the positive class.
+revol_util (-1.04): Higher revolving utilization (revol_util) negatively impacts the outcome, which indicates that applicants with higher credit card utilization may have a lower likelihood of success in the model.
+Moderate Positive Coefficients:
+issue_year (1.27): The year the loan was issued has a moderate positive effect on the outcome. Newer loans or loans from a specific time period might be more likely to have a favorable outcome.
+revol_bal (0.52): The balance of revolving credit positively affects the outcome, though it has a smaller effect compared to other features.
+loan_amnt (-0.91): The loan amount has a negative impact on the likelihood of a positive class, suggesting that higher loan amounts are less likely to result in the target outcome.
+Small Positive Coefficients:
+term (0.54): The term of the loan (e.g., 36 months or 60 months) has a small positive impact on the outcome. A longer loan term may slightly increase the likelihood of success.
+emp_length (0.26): Length of employment has a positive, though relatively smaller, impact on the target variable. Longer employment durations may suggest more financial stability, improving chances of success.
+home_ownership (0.41): Whether the applicant owns a home also plays a small positive role in the outcome, implying that homeowners may be favored in the model.
+annual_inc (0.22): A higher annual income also has a minor positive effect on the outcome.
+Negligible Effects:
+mort_acc (0.01): This feature has a very small positive coefficient, suggesting that it has a negligible effect on the outcome.
+earliest_cr_line_year (-0.43) and earliest_cr_line_month (-0.02): Both of these features have negative coefficients, but their absolute values are relatively small, implying that the timing of the earliest credit line has a minor impact.
+initial_list_status (-0.08): The status when the loan was initially listed also has a negligible negative effect.
+Inconsistent Effects:
+pub_rec_bankruptcies (0.22): This feature, representing the number of bankruptcies on public record, has a small positive effect. It seems counterintuitive, as more bankruptcies are generally seen as risk factors, but the small magnitude suggests it may not be a strong predictor in your model.
+application_type (0.20): This feature has a small positive effect, which could indicate that the type of application (e.g., individual or joint) has a slight influence on the outcome.
+
+Insights and Analysis of the model metrics
+ROC Curve and AUC:
+The ROC curve shows a strong classifier with an Area Under Curve (AUC) of 0.89. This indicates the model has good separability between the two classes (0 and 1). The closer the AUC is to 1, the better the model is at predicting positive instances as positive and negative ones as negative.
+Confusion Matrix (Percentages):
+True Negative Rate (16.33%): These are instances where the actual class was 0, and the model predicted 0 correctly.
+False Positive Rate (3.28%): These are instances where the actual class was 0, but the model incorrectly predicted 1.
+False Negative Rate (15.41%): These are instances where the actual class was 1, but the model predicted 0.
+True Positive Rate (64.98%): These are instances where the actual class was 1, and the model predicted 1 correctly.
+The model performs very well on predicting class 1 but has some misclassification in predicting class 0.
+This indicates that the model has good accuracy in predicting "Fully Paid" loans (class 1), as shown by the high true positive rate (64.98%). However, the false negative rate (15.41%) suggests that a significant portion of "Fully Paid" loans are incorrectly classified as "Charged Off" (class 0). The false positive rate (3.28%) is low, indicating good performance for avoiding false alarms for "Charged Off" loans.
+Evaluation Metrics:
+Precision (0.95): The model is highly precise for class 1 predictions. Out of all instances predicted as 1, 95% are correct.
+Recall (0.81): The recall is lower than precision, indicating some false negatives exist. This means the model missed some instances of class 1.
+F1 Score (0.87): A good balance between precision and recall, showing the model is reliable in predicting class 1.
+Classification Report:
+Class 0 has a lower precision (0.51) and recall (0.83), leading to an F1 score of 0.64. This indicates difficulty in classifying this minority class.
+Class 1 has excellent metrics, showcasing the model's bias toward the majority class due to the dataset's imbalance.
+Accuracy (81%): Indicates that the model correctly classifies 81% of all instances.
+Observations:
+High precision for class 1 suggests the model makes fewer false positive predictions, which is good for minimizing unnecessary interventions or actions in a real-world scenario.
+The recall for class 1 could be improved further to ensure the model does not miss important cases.
